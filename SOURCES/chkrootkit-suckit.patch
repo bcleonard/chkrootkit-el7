@@ -1,0 +1,19 @@
+diff -ru chkrootkit-0.50-orig/chkrootkit chkrootkit-0.50/chkrootkit
+--- chkrootkit-0.50-orig/chkrootkit	2014-05-21 12:28:56.000000000 +0100
++++ chkrootkit-0.50/chkrootkit	2014-10-03 16:06:48.000000000 +0100
+@@ -989,7 +989,14 @@
+       if [ ${SYSTEM} != "HP-UX" ] && ( ${strings} ${ROOTDIR}sbin/init | ${egrep} 'HOME='   || \
+ 	      cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." ) >/dev/null 2>&1
+         then
+-        echo "Warning: ${ROOTDIR}sbin/init INFECTED"
++        #echo "Warning: ${ROOTDIR}sbin/init INFECTED"
++        # ignore false positive (bugzilla #636231)
++        readlink -f  ${ROOTDIR}sbin/init|${egrep} -q /systemd$
++        if [ $? -eq 0 ]; then
++          if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
++        else
++          echo "Warning: ${ROOTDIR}sbin/init INFECTED"
++        fi
+       else
+          if [ -d ${ROOTDIR}/dev/.golf ]; then
+             echo "Warning: Suspect directory ${ROOTDIR}dev/.golf"
